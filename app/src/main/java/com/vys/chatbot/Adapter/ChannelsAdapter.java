@@ -32,7 +32,6 @@ public class ChannelsAdapter extends RecyclerView.Adapter<ChannelsAdapter.MyView
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         holder.name.setText(list.get(position).getName());
-        holder.desc.setText(list.get(position).getPurpose().getValue());
     }
 
     @Override
@@ -41,11 +40,10 @@ public class ChannelsAdapter extends RecyclerView.Adapter<ChannelsAdapter.MyView
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
-        TextView name,desc;
+        TextView name;
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.channels_adapter_name_tv);
-            desc = itemView.findViewById(R.id.channels_adapter_desc_tv);
         }
     }
 }
