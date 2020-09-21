@@ -4,9 +4,11 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.vys.chatbot.Class.ApiRequestClass;
 import com.vys.chatbot.Models.ChannelsAPI.Channel;
 import com.vys.chatbot.Models.UserProfileAPI.UserProfileAPI;
@@ -44,6 +46,9 @@ public class DMAdapter extends RecyclerView.Adapter<DMAdapter.MyViewHolder> {
             public void onResponse(Call<UserProfileAPI> call, Response<UserProfileAPI> response) {
                 if(response.isSuccessful()){
                     holder.name.setText(response.body().getUser().getName());
+                    holder.image.setVisibility(View.VISIBLE);
+                    holder.prefix.setVisibility(View.GONE);
+                    Glide.with(context).load(response.body().getUser().getProfile().getImage48()).into(holder.image);
                 }else{
                     holder.name.setText(list.get(position).getUser());
                 }
@@ -63,10 +68,12 @@ public class DMAdapter extends RecyclerView.Adapter<DMAdapter.MyViewHolder> {
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         TextView name,prefix;
+        ImageView image;
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.channels_adapter_name_tv);
             prefix = itemView.findViewById(R.id.channels_adapter_prefix);
+            image = itemView.findViewById(R.id.channels_adapter_icon);
         }
     }
 }
