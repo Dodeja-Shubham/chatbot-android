@@ -1,10 +1,10 @@
 
-package com.vys.chatbot.Models.MessagesAPI;
+package com.vys.chatbot.Models.ChannelMessagesAPI;
 import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class MessagesAPI {
+public class ChannelMessagesAPI {
 
     @SerializedName("ok")
     @Expose

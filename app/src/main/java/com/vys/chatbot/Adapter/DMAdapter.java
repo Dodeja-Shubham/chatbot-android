@@ -1,6 +1,8 @@
 package com.vys.chatbot.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,7 +10,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.balysv.materialripple.MaterialRippleLayout;
 import com.bumptech.glide.Glide;
+import com.vys.chatbot.Activity.MainActivity;
+import com.vys.chatbot.Activity.MessagesActivity;
 import com.vys.chatbot.Class.ApiRequestClass;
 import com.vys.chatbot.Models.ChannelsAPI.Channel;
 import com.vys.chatbot.Models.UserProfileAPI.UserProfileAPI;
@@ -40,7 +46,7 @@ public class DMAdapter extends RecyclerView.Adapter<DMAdapter.MyViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         holder.prefix.setText("@");
-        Call<UserProfileAPI> call = retrofitCall.userProfile(context.getString(R.string.slack_bot_token),list.get(position).getUser());
+        Call<UserProfileAPI> call = retrofitCall.userProfile(MainActivity.BOT_TOKEN,list.get(position).getUser());
         call.enqueue(new Callback<UserProfileAPI>() {
             @Override
             public void onResponse(Call<UserProfileAPI> call, Response<UserProfileAPI> response) {
@@ -66,14 +72,24 @@ public class DMAdapter extends RecyclerView.Adapter<DMAdapter.MyViewHolder> {
         return list.size();
     }
 
-    public static class MyViewHolder extends RecyclerView.ViewHolder {
+    public class MyViewHolder extends RecyclerView.ViewHolder {
         TextView name,prefix;
         ImageView image;
+        MaterialRippleLayout ripple;
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.channels_adapter_name_tv);
             prefix = itemView.findViewById(R.id.channels_adapter_prefix);
             image = itemView.findViewById(R.id.channels_adapter_icon);
+            ripple = itemView.findViewById(R.id.channel_adapter_ripple);
+            ripple.setOnClickListener(it -> {
+                Intent intent = new Intent(context, MessagesActivity.class);
+                intent.putExtra("type","dm");
+                intent.putExtra("id",list.get(getAdapterPosition()).getId());
+                intent.putExtra("name", "");
+                intent.putExtra("user", list.get(getAdapterPosition()).getUser());
+                context.startActivity(intent);
+            });
         }
     }
 }

@@ -29,6 +29,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
 
     private final String TAG = "MainActivity";
+    public static String BOT_TOKEN = "xoxb-1371445904901-1387166513201-Im5Gl4Cy4JWqqvDqOsgRbXtm";
+    public static String USER_TOKEN = "xoxp-1371445904901-1387164227009-1380728937556-34727a5d34583f751d1d17c5169f18f1";
 
     RecyclerView channelsRecyclerView, messagesRecyclerView;
     ChannelsAPI channelsData;
@@ -61,13 +63,13 @@ public class MainActivity extends AppCompatActivity {
         Map<String, String> data = new HashMap<>();
         data.put("types", "public_channel,private_channel");
         channelsRecyclerView.setAdapter(new EmptyDataShimmerAdapter());
-        Call<ChannelsAPI> call = retrofitCall.channels(getString(R.string.slack_user_token), data);
+        Call<ChannelsAPI> call = retrofitCall.channels(USER_TOKEN, data);
         call.enqueue(new Callback<ChannelsAPI>() {
             @Override
             public void onResponse(Call<ChannelsAPI> call, Response<ChannelsAPI> response) {
                 if (response.isSuccessful()) {
                     channelsData = response.body();
-                    channelsRecyclerView.setAdapter(new ChannelsAdapter(channelsData.getChannels()));
+                    channelsRecyclerView.setAdapter(new ChannelsAdapter(channelsData.getChannels(),MainActivity.this));
                 } else {
                     try {
                         Log.e(TAG, response.errorBody().string());
@@ -89,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         messagesRecyclerView.setAdapter(new EmptyDataShimmerAdapter());
         Map<String, String> data = new HashMap<>();
         data.put("types", "mpim,im");
-        Call<ChannelsAPI> call = retrofitCall.channels(getString(R.string.slack_user_token), data);
+        Call<ChannelsAPI> call = retrofitCall.channels(USER_TOKEN, data);
         call.enqueue(new Callback<ChannelsAPI>() {
             @Override
             public void onResponse(Call<ChannelsAPI> call, Response<ChannelsAPI> response) {

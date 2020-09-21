@@ -1,5 +1,5 @@
 
-package com.vys.chatbot.Models.MessagesAPI;
+package com.vys.chatbot.Models.ChannelMessagesAPI;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

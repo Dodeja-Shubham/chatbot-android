@@ -1,5 +1,8 @@
 package com.vys.chatbot.Adapter;
 
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +11,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.balysv.materialripple.MaterialRippleLayout;
+import com.vys.chatbot.Activity.MessagesActivity;
 import com.vys.chatbot.Models.ChannelsAPI.Channel;
 import com.vys.chatbot.R;
 
@@ -17,15 +22,17 @@ import java.util.List;
 public class ChannelsAdapter extends RecyclerView.Adapter<ChannelsAdapter.MyViewHolder> {
 
     List<Channel> list;
+    Context context;
 
-    public ChannelsAdapter(List<Channel> listData){
+    public ChannelsAdapter(List<Channel> listData, Context context) {
         this.list = listData;
+        this.context = context;
     }
 
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.channels_adapter_layout,parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.channels_adapter_layout, parent, false);
         return new MyViewHolder((view));
     }
 
@@ -39,11 +46,23 @@ public class ChannelsAdapter extends RecyclerView.Adapter<ChannelsAdapter.MyView
         return list.size();
     }
 
-    public static class MyViewHolder extends RecyclerView.ViewHolder {
+    public class MyViewHolder extends RecyclerView.ViewHolder {
         TextView name;
+        MaterialRippleLayout rippleLayout;
+
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.channels_adapter_name_tv);
+            rippleLayout = itemView.findViewById(R.id.channel_adapter_ripple);
+
+            rippleLayout.setOnClickListener(it -> {
+                Intent intent = new Intent(context, MessagesActivity.class);
+                intent.putExtra("type", "channel");
+                intent.putExtra("id", list.get(getAdapterPosition()).getId());
+                intent.putExtra("name", list.get(getAdapterPosition()).getName());
+                intent.putExtra("user", "");
+                context.startActivity(intent);
+            });
         }
     }
 }

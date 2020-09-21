@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">ChatBot</string>
-    <string name="slack_bot_token">xoxb-1371445904901-1387166513201-Im5Gl4Cy4JWqqvDqOsgRbXtm</string>
-    <string name="slack_user_token">xoxp-1371445904901-1387164227009-1380728937556-34727a5d34583f751d1d17c5169f18f1</string>
     <string name="channels">Channels</string>
     <string name="plus_text">+</string>
     <string name="direct_messages">Direct Messages</string>

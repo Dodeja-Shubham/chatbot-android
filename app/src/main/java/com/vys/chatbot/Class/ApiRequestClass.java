@@ -1,7 +1,8 @@
 package com.vys.chatbot.Class;
 
 import com.vys.chatbot.Models.ChannelsAPI.ChannelsAPI;
-import com.vys.chatbot.Models.MessagesAPI.MessagesAPI;
+import com.vys.chatbot.Models.ChannelMessagesAPI.ChannelMessagesAPI;
+import com.vys.chatbot.Models.DMMessagesAPI.DMMessagesAPI;
 import com.vys.chatbot.Models.UserProfileAPI.UserProfileAPI;
 
 import java.util.Map;
@@ -21,7 +22,10 @@ public interface ApiRequestClass {
     Call<ChannelsAPI> channels(@Query("token") String token, @QueryMap Map<String, String> query);
 
     @GET("conversations.history")
-    Call<MessagesAPI> messages(@Query("token") String token, @QueryMap Map<String, String> query);
+    Call<ChannelMessagesAPI> messagesChannel(@Query("token") String token, @Query("channel") String id);
+
+    @GET("conversations.history")
+    Call<DMMessagesAPI> messagesUser(@Query("token") String token, @Query("channel") String id);
 
 
 
