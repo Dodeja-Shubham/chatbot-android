@@ -44,61 +44,73 @@ public class DMMessagesAdapter extends RecyclerView.Adapter<DMMessagesAdapter.My
         return new MyViewHolder(view);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
-
         if(list.get(position).getText().startsWith("<@")){
             String user = list.get(position).getText().substring(list.get(position).getText().indexOf("<@") + 2, list.get(position).getText().indexOf(">"));
-            Call<UserProfileAPI> callT = retrofitCall.userProfile(MainActivity.BOT_TOKEN,user);
-            callT.enqueue(new Callback<UserProfileAPI>() {
-                @SuppressLint("SetTextI18n")
+            if(MainActivity.usersNames.containsKey(user)){
+                holder.message.setText("@" + MainActivity.usersNames.get(user) + " joined via your invite link!");
+            }else{
+                Call<UserProfileAPI> callT = retrofitCall.userProfile(MainActivity.BOT_TOKEN,user);
+                callT.enqueue(new Callback<UserProfileAPI>() {
+                    @SuppressLint("SetTextI18n")
+                    @Override
+                    public void onResponse(Call<UserProfileAPI> call, Response<UserProfileAPI> response) {
+                        if(response.isSuccessful()){
+                            holder.message.setText("@" + response.body().getUser().getName() + " joined via your invite link!");
+                        }else{
+                            holder.message.setText("New User joined");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<UserProfileAPI> call, Throwable t) {
+                        holder.message.setText("New User joined");
+                    }
+                });
+            }
+        }else{
+            holder.message.setText(list.get(position).getText());
+        }
+        holder.time.setText(getDate((long) Double.parseDouble(list.get(position).getTs())));
+        if(MainActivity.usersNames.containsKey(list.get(position).getUser())){
+            holder.name.setText(MainActivity.usersNames.get(list.get(position).getUser()));
+        }else{
+            Call<UserProfileAPI> call = retrofitCall.userProfile(MainActivity.BOT_TOKEN,list.get(position).getUser());
+            call.enqueue(new Callback<UserProfileAPI>() {
                 @Override
                 public void onResponse(Call<UserProfileAPI> call, Response<UserProfileAPI> response) {
                     if(response.isSuccessful()){
-                        holder.message.setText("@" + response.body().getUser().getName() + " joined via your invite link!");
+                        holder.name.setText(response.body().getUser().getName());
                     }else{
-                        holder.message.setText("New User joined");
+                        holder.name.setText(list.get(position).getUser());
                     }
                 }
 
                 @Override
                 public void onFailure(Call<UserProfileAPI> call, Throwable t) {
-                    holder.message.setText("New User joined");
-                }
-            });
-        }else{
-            holder.message.setText(list.get(position).getText());
-        }
-        holder.time.setText(getDate((long) Double.parseDouble(list.get(position).getTs())));
-        Call<UserProfileAPI> call = retrofitCall.userProfile(MainActivity.BOT_TOKEN,list.get(position).getUser());
-        call.enqueue(new Callback<UserProfileAPI>() {
-            @Override
-            public void onResponse(Call<UserProfileAPI> call, Response<UserProfileAPI> response) {
-                if(response.isSuccessful()){
-                    holder.name.setText(response.body().getUser().getName());
-                }else{
                     holder.name.setText(list.get(position).getUser());
                 }
-            }
-
-            @Override
-            public void onFailure(Call<UserProfileAPI> call, Throwable t) {
-                holder.name.setText(list.get(position).getUser());
-            }
-        });
+            });
+        }
     }
 
     @Override
     public int getItemCount() {
-        return list.size();
+        return list == null ? 0 : list.size();
     }
 
     private String getDate(long time) {
         Calendar cal = Calendar.getInstance(Locale.ENGLISH);
         cal.setTimeInMillis(time * 1000);
-        String date = DateFormat.format("dd-MM hh:mm", cal).toString();
-        return date;
+        return DateFormat.format("dd-MM hh:mm", cal).toString();
+    }
+
+    public void addNewData(Message msg) {
+        list.add(msg);
+        notifyDataSetChanged();
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {

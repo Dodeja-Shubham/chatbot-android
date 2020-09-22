@@ -54,6 +54,7 @@ public class DMAdapter extends RecyclerView.Adapter<DMAdapter.MyViewHolder> {
                     holder.name.setText(response.body().getUser().getName());
                     holder.image.setVisibility(View.VISIBLE);
                     holder.prefix.setVisibility(View.GONE);
+                    MainActivity.usersNames.put(list.get(position).getUser(),response.body().getUser().getName());
                     Glide.with(context).load(response.body().getUser().getProfile().getImage48()).into(holder.image);
                 }else{
                     holder.name.setText(list.get(position).getUser());
@@ -69,7 +70,7 @@ public class DMAdapter extends RecyclerView.Adapter<DMAdapter.MyViewHolder> {
 
     @Override
     public int getItemCount() {
-        return list.size();
+        return list == null ? 0 : list.size();
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -82,14 +83,6 @@ public class DMAdapter extends RecyclerView.Adapter<DMAdapter.MyViewHolder> {
             prefix = itemView.findViewById(R.id.channels_adapter_prefix);
             image = itemView.findViewById(R.id.channels_adapter_icon);
             ripple = itemView.findViewById(R.id.channel_adapter_ripple);
-            ripple.setOnClickListener(it -> {
-                Intent intent = new Intent(context, MessagesActivity.class);
-                intent.putExtra("type","dm");
-                intent.putExtra("id",list.get(getAdapterPosition()).getId());
-                intent.putExtra("name", "");
-                intent.putExtra("user", list.get(getAdapterPosition()).getUser());
-                context.startActivity(intent);
-            });
         }
     }
 }

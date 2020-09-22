@@ -8,17 +8,22 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.balysv.materialripple.MaterialRippleLayout;
 import com.vys.chatbot.Adapter.ChannelMessagesAdapter;
 import com.vys.chatbot.Adapter.DMMessagesAdapter;
 import com.vys.chatbot.Class.ApiRequestClass;
 import com.vys.chatbot.Models.ChannelMessagesAPI.ChannelMessagesAPI;
+import com.vys.chatbot.Models.ChannelMessagesAPI.Message;
 import com.vys.chatbot.Models.DMMessagesAPI.DMMessagesAPI;
 import com.vys.chatbot.Models.UserProfileAPI.UserProfileAPI;
 import com.vys.chatbot.R;
 
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -48,6 +53,9 @@ public class MessagesActivity extends AppCompatActivity {
     MaterialRippleLayout backBtn;
     TextView title;
 
+    ImageView sendBtn;
+    EditText typedMessage;
+
     String type = "",id = "",name = "",user = "";
 
     @SuppressLint("SetTextI18n")
@@ -65,9 +73,18 @@ public class MessagesActivity extends AppCompatActivity {
             Log.e(TAG,e.getMessage());
         }
 
+        if(type.equals("") || id.equals("")){
+            Toast.makeText(this,"Something went wrong",Toast.LENGTH_LONG).show();
+            super.onBackPressed();
+        }
+
         messagesRV = findViewById(R.id.messages_rv);
         backBtn = findViewById(R.id.messages_back);
         title = findViewById(R.id.messages_title);
+        typedMessage = findViewById(R.id.messages_edit_text);
+        sendBtn = findViewById(R.id.messages_send_btn);
+
+        sendBtn.setOnClickListener(it -> sendMessage());
 
         backBtn.setOnClickListener(it -> super.onBackPressed());
 
@@ -77,6 +94,16 @@ public class MessagesActivity extends AppCompatActivity {
         }else{
             loadUserInfo();
             loadUserMessages();
+        }
+    }
+
+
+    private void sendMessage(){
+        String msg = typedMessage.getText().toString().trim();
+        if(type.equals("channel") && !msg.isEmpty()){
+
+        }else if(!msg.isEmpty()){
+
         }
     }
 
@@ -108,7 +135,7 @@ public class MessagesActivity extends AppCompatActivity {
             public void onResponse(Call<ChannelMessagesAPI> call, Response<ChannelMessagesAPI> response) {
                 if(response.isSuccessful()){
                     channelMessages = response.body();
-                    LinearLayoutManager layoutManager = new LinearLayoutManager(MessagesActivity.this,LinearLayoutManager.VERTICAL,true);
+                    LinearLayoutManager layoutManager = new LinearLayoutManager(MessagesActivity.this);
                     layoutManager.setReverseLayout(true);
                     messagesRV.setLayoutManager(layoutManager);
                     messagesRV.setAdapter(new ChannelMessagesAdapter(response.body().getMessages(),retrofitCall));
@@ -129,7 +156,7 @@ public class MessagesActivity extends AppCompatActivity {
             public void onResponse(Call<DMMessagesAPI> call, Response<DMMessagesAPI> response) {
                 if(response.isSuccessful()){
                     userMessages = response.body();
-                    LinearLayoutManager layoutManager = new LinearLayoutManager(MessagesActivity.this,LinearLayoutManager.VERTICAL,true);
+                    LinearLayoutManager layoutManager = new LinearLayoutManager(MessagesActivity.this);
                     layoutManager.setReverseLayout(true);
                     messagesRV.setLayoutManager(layoutManager);
                     messagesRV.setAdapter(new DMMessagesAdapter(response.body().getMessages(),retrofitCall));

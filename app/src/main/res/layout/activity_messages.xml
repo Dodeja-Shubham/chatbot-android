@@ -57,9 +57,41 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/messages_rv"
+            app:stackFromEnd="true"
+            app:reverseLayout="true"
+            android:layout_marginBottom="3dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/send_message_holder"/>
+
+        <LinearLayout
+            android:background="#EFEFEF"
+            android:id="@+id/send_message_holder"
+            android:paddingVertical="8dp"
+            android:orientation="horizontal"
             android:layout_alignParentBottom="true"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:hint="@string/type_message"
+                android:id="@+id/messages_edit_text"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_marginHorizontal="13dp"
+                android:layout_height="wrap_content"/>
+
+            <ImageView
+                android:id="@+id/messages_send_btn"
+                android:rotation="320"
+                android:layout_marginEnd="13dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_send"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                app:tint="@color/colorPrimaryDark" />
+
+        </LinearLayout>
 
     </RelativeLayout>
 

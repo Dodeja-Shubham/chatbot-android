@@ -4,13 +4,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import com.vys.chatbot.Adapter.ChannelsAdapter;
 import com.vys.chatbot.Adapter.EmptyDataShimmerAdapter;
 import com.vys.chatbot.Adapter.DMAdapter;
 import com.vys.chatbot.Class.ApiRequestClass;
+import com.vys.chatbot.Class.RecyclerItemClickListener;
 import com.vys.chatbot.Models.ChannelsAPI.ChannelsAPI;
 import com.vys.chatbot.R;
 
@@ -29,8 +32,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
 
     private final String TAG = "MainActivity";
-    public static String BOT_TOKEN = "xoxb-1371445904901-1387166513201-Im5Gl4Cy4JWqqvDqOsgRbXtm";
-    public static String USER_TOKEN = "xoxp-1371445904901-1387164227009-1380728937556-34727a5d34583f751d1d17c5169f18f1";
+    public static String BOT_TOKEN = "xoxb-1371445904901-1387166513201-m2xymb5Esy2XKOTv1RP21pAQ";
+    public static String USER_TOKEN = "xoxp-1371445904901-1387164227009-1391112644033-283137d424e07b88e9c7fc052beb492d";
+    public static Map<String,String> usersNames = new HashMap<>();
 
     RecyclerView channelsRecyclerView, messagesRecyclerView;
     ChannelsAPI channelsData;
@@ -70,6 +74,22 @@ public class MainActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     channelsData = response.body();
                     channelsRecyclerView.setAdapter(new ChannelsAdapter(channelsData.getChannels(),MainActivity.this));
+                    channelsRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(MainActivity.this, channelsRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(View view, int position) {
+                            Intent intent = new Intent(MainActivity.this, MessagesActivity.class);
+                            intent.putExtra("type", "channel");
+                            intent.putExtra("id", channelsData.getChannels().get(position).getId());
+                            intent.putExtra("name", channelsData.getChannels().get(position).getName());
+                            intent.putExtra("user", "");
+                            startActivity(intent);
+                        }
+
+                        @Override
+                        public void onLongItemClick(View view, int position) {
+
+                        }
+                    }));
                 } else {
                     try {
                         Log.e(TAG, response.errorBody().string());
@@ -98,6 +118,22 @@ public class MainActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     messagesData = response.body();
                     messagesRecyclerView.setAdapter(new DMAdapter(messagesData.getChannels(),MainActivity.this,retrofitCall));
+                    messagesRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(MainActivity.this, messagesRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(View view, int position) {
+                            Intent intent = new Intent(MainActivity.this, MessagesActivity.class);
+                            intent.putExtra("type","dm");
+                            intent.putExtra("id",messagesData.getChannels().get(position).getId());
+                            intent.putExtra("name", "");
+                            intent.putExtra("user", messagesData.getChannels().get(position).getUser());
+                            startActivity(intent);
+                        }
+
+                        @Override
+                        public void onLongItemClick(View view, int position) {
+
+                        }
+                    }));
                 } else {
                     try {
                         Log.e(TAG, response.errorBody().string());

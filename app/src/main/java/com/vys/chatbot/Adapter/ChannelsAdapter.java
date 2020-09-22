@@ -43,7 +43,7 @@ public class ChannelsAdapter extends RecyclerView.Adapter<ChannelsAdapter.MyView
 
     @Override
     public int getItemCount() {
-        return list.size();
+        return list == null ? 0 : list.size();
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -54,15 +54,6 @@ public class ChannelsAdapter extends RecyclerView.Adapter<ChannelsAdapter.MyView
             super(itemView);
             name = itemView.findViewById(R.id.channels_adapter_name_tv);
             rippleLayout = itemView.findViewById(R.id.channel_adapter_ripple);
-
-            rippleLayout.setOnClickListener(it -> {
-                Intent intent = new Intent(context, MessagesActivity.class);
-                intent.putExtra("type", "channel");
-                intent.putExtra("id", list.get(getAdapterPosition()).getId());
-                intent.putExtra("name", list.get(getAdapterPosition()).getName());
-                intent.putExtra("user", "");
-                context.startActivity(intent);
-            });
         }
     }
 }
