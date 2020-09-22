@@ -106,7 +106,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
     private void loadMessagesData() {
         messagesRecyclerView.setAdapter(new EmptyDataShimmerAdapter());
         Map<String, String> data = new HashMap<>();

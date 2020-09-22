@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -17,12 +18,15 @@ import com.balysv.materialripple.MaterialRippleLayout;
 import com.vys.chatbot.Adapter.ChannelMessagesAdapter;
 import com.vys.chatbot.Adapter.DMMessagesAdapter;
 import com.vys.chatbot.Class.ApiRequestClass;
+import com.vys.chatbot.Models.ChannelJoinAPI.ChannelJoinAPI;
 import com.vys.chatbot.Models.ChannelMessagesAPI.ChannelMessagesAPI;
 import com.vys.chatbot.Models.ChannelMessagesAPI.Message;
+import com.vys.chatbot.Models.ChannelsAPI.Channel;
 import com.vys.chatbot.Models.DMMessagesAPI.DMMessagesAPI;
 import com.vys.chatbot.Models.UserProfileAPI.UserProfileAPI;
 import com.vys.chatbot.R;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -58,6 +62,8 @@ public class MessagesActivity extends AppCompatActivity {
 
     String type = "",id = "",name = "",user = "";
 
+    Channel userChannelInfo,botChannelInfo;
+
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +97,7 @@ public class MessagesActivity extends AppCompatActivity {
         if(type.equals("channel")){
             title.setText(name);
             loadChannelMessages();
+            loadChannelInfo();
         }else{
             loadUserInfo();
             loadUserMessages();
@@ -116,8 +123,13 @@ public class MessagesActivity extends AppCompatActivity {
             public void onResponse(Call<UserProfileAPI> call, Response<UserProfileAPI> response) {
                 if(response.isSuccessful()){
                     title.setText(response.body().getUser().getName());
-                }else{
+                } else {
                     title.setText(id);
+                    try {
+                        Log.e(TAG, response.errorBody().string());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -139,6 +151,12 @@ public class MessagesActivity extends AppCompatActivity {
                     layoutManager.setReverseLayout(true);
                     messagesRV.setLayoutManager(layoutManager);
                     messagesRV.setAdapter(new ChannelMessagesAdapter(response.body().getMessages(),retrofitCall));
+                } else {
+                    try {
+                        Log.e(TAG, response.errorBody().string());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -160,11 +178,64 @@ public class MessagesActivity extends AppCompatActivity {
                     layoutManager.setReverseLayout(true);
                     messagesRV.setLayoutManager(layoutManager);
                     messagesRV.setAdapter(new DMMessagesAdapter(response.body().getMessages(),retrofitCall));
+                } else {
+                    try {
+                        Log.e(TAG, response.errorBody().string());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<DMMessagesAPI> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void loadChannelInfo(){
+        findViewById(R.id.send_message_holder).setVisibility(View.GONE);
+
+        Call<Channel> callU = retrofitCall.channelInfoUser(USER_TOKEN,id);
+        Call<Channel> callB = retrofitCall.channelInfoUser(BOT_TOKEN,id);
+
+        callU.enqueue(new Callback<Channel>() {
+            @Override
+            public void onResponse(Call<Channel> call, Response<Channel> response) {
+                if(response.isSuccessful()){
+                    userChannelInfo = response.body();
+                    callB.enqueue(new Callback<Channel>() {
+                        @Override
+                        public void onResponse(Call<Channel> call, Response<Channel> response) {
+                            if(response.isSuccessful()){
+                                botChannelInfo = response.body();
+                                findViewById(R.id.send_message_holder).setVisibility(View.VISIBLE);
+                            } else {
+                                try {
+                                    Log.e(TAG, response.errorBody().string());
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Channel> call, Throwable t) {
+                            Log.e(TAG,t.getMessage());
+                        }
+                    });
+                } else {
+                    try {
+                        Log.e(TAG, response.errorBody().string());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Channel> call, Throwable t) {
 
             }
         });
