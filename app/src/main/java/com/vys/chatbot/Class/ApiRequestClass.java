@@ -1,5 +1,6 @@
 package com.vys.chatbot.Class;
 
+import com.vys.chatbot.Models.ChannelInfoAPI.ChannelInfoAPI;
 import com.vys.chatbot.Models.ChannelJoinAPI.ChannelJoinAPI;
 import com.vys.chatbot.Models.ChannelMessagesAPI.Message;
 import com.vys.chatbot.Models.ChannelsAPI.Channel;
@@ -32,7 +33,7 @@ public interface ApiRequestClass {
     Call<DMMessagesAPI> messagesUser(@Query("token") String token, @Query("channel") String id);
 
     @GET("conversations.info")
-    Call<Channel> channelInfoUser(@Query("token") String token, @Query("channel") String id);
+    Call<ChannelInfoAPI> channelInfoUser(@Query("token") String token, @Query("channel") String id);
 
 
 
@@ -44,9 +45,14 @@ public interface ApiRequestClass {
 
 
     @GET("conversations.info")
-    Call<Channel> channelInfoBot(@Query("token") String token, @Query("channel") String id);
+    Call<ChannelInfoAPI> channelInfoBot(@Query("token") String token, @Query("channel") String id);
 
 
+
+
+
+
+    /**common*/
     @POST("conversations.join")
     Call<ChannelJoinAPI> joinChannel(@Query("token") String token, @Query("channel") String id);
 }

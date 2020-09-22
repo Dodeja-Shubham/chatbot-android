@@ -40,4 +40,5 @@ dependencies {
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
     implementation 'com.androidadvance:topsnackbar:1.1.1'
     implementation 'com.balysv:material-ripple:1.0.2'
+    implementation 'com.crowdfire.cfalertdialog:cfalertdialog:1.1.0'
 }

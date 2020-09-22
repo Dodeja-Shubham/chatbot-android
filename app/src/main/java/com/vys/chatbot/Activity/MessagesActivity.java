@@ -6,22 +6,27 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.balysv.materialripple.MaterialRippleLayout;
+import com.crowdfire.cfalertdialog.CFAlertDialog;
 import com.vys.chatbot.Adapter.ChannelMessagesAdapter;
 import com.vys.chatbot.Adapter.DMMessagesAdapter;
 import com.vys.chatbot.Class.ApiRequestClass;
+import com.vys.chatbot.Models.ChannelInfoAPI.ChannelInfoAPI;
 import com.vys.chatbot.Models.ChannelJoinAPI.ChannelJoinAPI;
 import com.vys.chatbot.Models.ChannelMessagesAPI.ChannelMessagesAPI;
 import com.vys.chatbot.Models.ChannelMessagesAPI.Message;
 import com.vys.chatbot.Models.ChannelsAPI.Channel;
+import com.vys.chatbot.Models.ChannelsAPI.ChannelsAPI;
 import com.vys.chatbot.Models.DMMessagesAPI.DMMessagesAPI;
 import com.vys.chatbot.Models.UserProfileAPI.UserProfileAPI;
 import com.vys.chatbot.R;
@@ -60,9 +65,11 @@ public class MessagesActivity extends AppCompatActivity {
     ImageView sendBtn;
     EditText typedMessage;
 
+    LinearLayout holder;
+
     String type = "",id = "",name = "",user = "";
 
-    Channel userChannelInfo,botChannelInfo;
+    ChannelInfoAPI userChannelInfo,botChannelInfo;
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -89,6 +96,9 @@ public class MessagesActivity extends AppCompatActivity {
         title = findViewById(R.id.messages_title);
         typedMessage = findViewById(R.id.messages_edit_text);
         sendBtn = findViewById(R.id.messages_send_btn);
+        holder = findViewById(R.id.send_message_holder);
+
+        holder.setVisibility(View.GONE);
 
         sendBtn.setOnClickListener(it -> sendMessage());
 
@@ -113,7 +123,6 @@ public class MessagesActivity extends AppCompatActivity {
 
         }
     }
-
 
     private void loadUserInfo(){
         Call<UserProfileAPI> call = retrofitCall.userProfile(BOT_TOKEN,user);
@@ -195,22 +204,75 @@ public class MessagesActivity extends AppCompatActivity {
     }
 
     private void loadChannelInfo(){
-        findViewById(R.id.send_message_holder).setVisibility(View.GONE);
+        Call<ChannelInfoAPI> callU = retrofitCall.channelInfoUser(USER_TOKEN,id);
+        Call<ChannelInfoAPI> callB = retrofitCall.channelInfoUser(BOT_TOKEN,id);
 
-        Call<Channel> callU = retrofitCall.channelInfoUser(USER_TOKEN,id);
-        Call<Channel> callB = retrofitCall.channelInfoUser(BOT_TOKEN,id);
-
-        callU.enqueue(new Callback<Channel>() {
+        callU.enqueue(new Callback<ChannelInfoAPI>() {
             @Override
-            public void onResponse(Call<Channel> call, Response<Channel> response) {
+            public void onResponse(Call<ChannelInfoAPI> call, Response<ChannelInfoAPI> response) {
                 if(response.isSuccessful()){
                     userChannelInfo = response.body();
-                    callB.enqueue(new Callback<Channel>() {
+                    callB.enqueue(new Callback<ChannelInfoAPI>() {
                         @Override
-                        public void onResponse(Call<Channel> call, Response<Channel> response) {
+                        public void onResponse(Call<ChannelInfoAPI> call, Response<ChannelInfoAPI> response) {
                             if(response.isSuccessful()){
                                 botChannelInfo = response.body();
-                                findViewById(R.id.send_message_holder).setVisibility(View.VISIBLE);
+                                if(!userChannelInfo.getChannel().getIsMember() && !botChannelInfo.getChannel().getIsMember()){
+                                    CFAlertDialog.Builder builder = new CFAlertDialog.Builder(MessagesActivity.this)
+                                            .setDialogStyle(CFAlertDialog.CFAlertStyle.BOTTOM_SHEET)
+                                            .setTitle("Alert !!!")
+                                            .setMessage("You are not a member of this channel and neither is ChatBot. Do you want to join this channel ?")
+                                            .addButton("ADD ONLY ME", -1, -1, CFAlertDialog.CFAlertActionStyle.POSITIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                                joinChannel(USER_TOKEN,id);
+                                                dialog.dismiss();
+                                            })
+                                            .addButton("ADD CHATBOT", -1, -1, CFAlertDialog.CFAlertActionStyle.POSITIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                                joinChannel(BOT_TOKEN,id);
+                                                dialog.dismiss();
+                                            })
+                                            .addButton("ADD BOTH", -1, -1, CFAlertDialog.CFAlertActionStyle.POSITIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                                joinChannel(USER_TOKEN,id);
+                                                joinChannel(BOT_TOKEN,id);
+                                                dialog.dismiss();
+                                            })
+                                            .addButton("CANCEL", -1, -1, CFAlertDialog.CFAlertActionStyle.NEGATIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                                dialog.dismiss();
+                                            });
+                                    builder.show();
+                                }
+                                else if(!userChannelInfo.getChannel().getIsMember()){
+                                    CFAlertDialog.Builder builder = new CFAlertDialog.Builder(MessagesActivity.this)
+                                            .setDialogStyle(CFAlertDialog.CFAlertStyle.BOTTOM_SHEET)
+                                            .setTitle("Alert !!!")
+                                            .setMessage("You are not a member of this channel. Do you want to join this channel ?")
+                                            .addButton("JOIN", -1, -1, CFAlertDialog.CFAlertActionStyle.POSITIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                                joinChannel(USER_TOKEN,id);
+                                                dialog.dismiss();
+                                            })
+                                            .addButton("CANCEL", -1, -1, CFAlertDialog.CFAlertActionStyle.NEGATIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                                holder.setVisibility(View.VISIBLE);
+                                                dialog.dismiss();
+                                            });
+                                    builder.show();
+                                }
+                                else if(!botChannelInfo.getChannel().getIsMember()){
+                                    CFAlertDialog.Builder builder = new CFAlertDialog.Builder(MessagesActivity.this)
+                                            .setDialogStyle(CFAlertDialog.CFAlertStyle.BOTTOM_SHEET)
+                                            .setTitle("Alert !!!")
+                                            .setMessage("ChatBot is not a member of this channel. Do you want to add ChatBot in this channel ?")
+                                            .addButton("ADD CHATBOT", -1, -1, CFAlertDialog.CFAlertActionStyle.POSITIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                                joinChannel(BOT_TOKEN,id);
+                                                dialog.dismiss();
+                                            })
+                                            .addButton("CANCEL", -1, -1, CFAlertDialog.CFAlertActionStyle.NEGATIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                                holder.setVisibility(View.VISIBLE);
+                                                dialog.dismiss();
+                                            });
+                                    builder.show();
+                                }
+                                else {
+                                    holder.setVisibility(View.VISIBLE);
+                                }
                             } else {
                                 try {
                                     Log.e(TAG, response.errorBody().string());
@@ -221,7 +283,7 @@ public class MessagesActivity extends AppCompatActivity {
                         }
 
                         @Override
-                        public void onFailure(Call<Channel> call, Throwable t) {
+                        public void onFailure(Call<ChannelInfoAPI> call, Throwable t) {
                             Log.e(TAG,t.getMessage());
                         }
                     });
@@ -235,8 +297,33 @@ public class MessagesActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<Channel> call, Throwable t) {
+            public void onFailure(Call<ChannelInfoAPI> call, Throwable t) {
+                Log.e(TAG,t.getMessage());
+            }
+        });
+    }
 
+
+    private void joinChannel(String token,String channel){
+        Call<ChannelJoinAPI> call = retrofitCall.joinChannel(token,channel);
+        call.enqueue(new Callback<ChannelJoinAPI>() {
+            @Override
+            public void onResponse(Call<ChannelJoinAPI> call, Response<ChannelJoinAPI> response) {
+                if(response.isSuccessful()){
+                    loadChannelMessages();
+                    loadChannelInfo();
+                }else{
+                    try {
+                        Log.e(TAG, response.errorBody().string());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ChannelJoinAPI> call, Throwable t) {
+                Log.e(TAG,t.getMessage());
             }
         });
     }
