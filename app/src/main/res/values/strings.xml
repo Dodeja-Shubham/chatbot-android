@@ -5,4 +5,14 @@
     <string name="direct_messages">Direct Messages</string>
     <string name="hashtag">#</string>
     <string name="type_message">type message</string>
+    <string name="schedule_message">Schedule Message</string>
+    <string name="message_to_send">message to send</string>
+    <string name="scheduling">Scheduling</string>
+    <string name="user">User</string>
+    <string name="chatbot">ChatBot</string>
+    <string name="send_as">Send As :</string>
+    <string name="cancel">cancel</string>
+    <string name="send">SEND</string>
+    <string name="date">Date :</string>
+    <string name="time">Time</string>
 </resources>

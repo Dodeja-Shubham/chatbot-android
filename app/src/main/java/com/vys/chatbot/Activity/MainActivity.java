@@ -1,6 +1,7 @@
 package com.vys.chatbot.Activity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -50,6 +51,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        try {
+            toolbar.setTitle("ChatBot");
+            toolbar.setTitleTextColor(getColor(android.R.color.white));
+            setSupportActionBar(toolbar);
+        }catch (Exception e){
+            Log.e(TAG,e.getMessage());
+        }
 
         channelsRecyclerView = findViewById(R.id.main_channels_rv);
         messagesRecyclerView = findViewById(R.id.main_dm_rv);

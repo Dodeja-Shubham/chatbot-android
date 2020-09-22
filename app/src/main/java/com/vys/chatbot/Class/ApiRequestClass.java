@@ -7,6 +7,8 @@ import com.vys.chatbot.Models.ChannelsAPI.Channel;
 import com.vys.chatbot.Models.ChannelsAPI.ChannelsAPI;
 import com.vys.chatbot.Models.ChannelMessagesAPI.ChannelMessagesAPI;
 import com.vys.chatbot.Models.DMMessagesAPI.DMMessagesAPI;
+import com.vys.chatbot.Models.DelMessageAPI;
+import com.vys.chatbot.Models.SuccessResponse;
 import com.vys.chatbot.Models.UserProfileAPI.UserProfileAPI;
 
 import java.util.Map;
@@ -55,4 +57,13 @@ public interface ApiRequestClass {
     /**common*/
     @POST("conversations.join")
     Call<ChannelJoinAPI> joinChannel(@Query("token") String token, @Query("channel") String id);
+
+    @POST("chat.postMessage")
+    Call<SuccessResponse> sendMessage(@Query("token") String token, @Query("channel") String id, @Query("text") String text);
+
+    @POST("chat.delete")
+    Call<DelMessageAPI> delMessage(@Query("token") String token, @Query("channel") String id, @Query("ts") String ts);
+
+    @POST("chat.scheduleMessage")
+    Call<SuccessResponse> scheduleMessage(@Query("token") String token, @Query("channel") String id, @Query("text") String text, @Query("post_at") String ts);
 }
