@@ -506,8 +506,8 @@ public class MessagesActivity extends AppCompatActivity {
     }
 
     private void loadChannelInfo() {
-        Call<ChannelInfoAPI> callU = retrofitCall.channelInfoUser(USER_TOKEN, id);
-        Call<ChannelInfoAPI> callB = retrofitCall.channelInfoUser(BOT_TOKEN, id);
+        Call<ChannelInfoAPI> callU = retrofitCall.channelInfo(USER_TOKEN, id);
+        Call<ChannelInfoAPI> callB = retrofitCall.channelInfo(BOT_TOKEN, id);
         callU.enqueue(new Callback<ChannelInfoAPI>() {
             @Override
             public void onResponse(Call<ChannelInfoAPI> call, Response<ChannelInfoAPI> response) {

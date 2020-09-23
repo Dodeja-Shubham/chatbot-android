@@ -34,9 +34,6 @@ public interface ApiRequestClass {
     @GET("conversations.history")
     Call<DMMessagesAPI> messagesUser(@Query("token") String token, @Query("channel") String id);
 
-    @GET("conversations.info")
-    Call<ChannelInfoAPI> channelInfoUser(@Query("token") String token, @Query("channel") String id);
-
 
 
 
@@ -46,15 +43,15 @@ public interface ApiRequestClass {
     Call<UserProfileAPI> userProfile(@Query("token") String token, @Query("user") String id);
 
 
-    @GET("conversations.info")
-    Call<ChannelInfoAPI> channelInfoBot(@Query("token") String token, @Query("channel") String id);
-
 
 
 
 
 
     /**common*/
+    @GET("conversations.info")
+    Call<ChannelInfoAPI> channelInfo(@Query("token") String token, @Query("channel") String id);
+
     @POST("conversations.join")
     Call<ChannelJoinAPI> joinChannel(@Query("token") String token, @Query("channel") String id);
 

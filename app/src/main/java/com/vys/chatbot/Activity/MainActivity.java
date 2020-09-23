@@ -33,8 +33,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
 
     private final String TAG = "MainActivity";
-    public static String BOT_TOKEN = "xoxb-1371445904901-1387166513201-m2xymb5Esy2XKOTv1RP21pAQ";
-    public static String USER_TOKEN = "xoxp-1371445904901-1387164227009-1391112644033-283137d424e07b88e9c7fc052beb492d";
+    public static String BOT_TOKEN = "xoxb-1371445904901-1387166513201-X0m2O9KAGXFWqCaQR1dEr8fK";
+    public static String USER_TOKEN = "xoxp-1371445904901-1387164227009-1387504041444-0c472d677848929e16cbb713e223efe1";
     public static Map<String,String> usersNames = new HashMap<>();
 
     RecyclerView channelsRecyclerView, messagesRecyclerView;
