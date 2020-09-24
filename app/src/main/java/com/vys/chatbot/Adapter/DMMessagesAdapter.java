@@ -51,7 +51,7 @@ public class DMMessagesAdapter extends RecyclerView.Adapter<DMMessagesAdapter.My
         if(list.get(position).getText().startsWith("<@")){
             String user = list.get(position).getText().substring(list.get(position).getText().indexOf("<@") + 2, list.get(position).getText().indexOf(">"));
             if(MainActivity.usersNames.containsKey(user)){
-                holder.message.setText("@" + MainActivity.usersNames.get(user) + " joined via your invite link!");
+                holder.message.setText("@" + MainActivity.usersNames.get(user) + " joined !");
             }else{
                 Call<UserProfileAPI> callT = retrofitCall.userProfile(MainActivity.BOT_TOKEN,user);
                 callT.enqueue(new Callback<UserProfileAPI>() {

@@ -33,8 +33,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
 
     private final String TAG = "MainActivity";
-    public static String BOT_TOKEN = "xoxb-1371445904901-1387166513201-X0m2O9KAGXFWqCaQR1dEr8fK";
-    public static String USER_TOKEN = "xoxp-1371445904901-1387164227009-1387504041444-0c472d677848929e16cbb713e223efe1";
+    public static String BOT_TOKEN = "";
+    public static String USER_TOKEN = "";
     public static Map<String,String> usersNames = new HashMap<>();
 
     RecyclerView channelsRecyclerView, messagesRecyclerView;
@@ -52,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
+        BOT_TOKEN = getString(R.string.bot_token);
+        USER_TOKEN = getString(R.string.user_token);
         try {
             toolbar.setTitle("ChatBot");
             toolbar.setTitleTextColor(getColor(android.R.color.white));
