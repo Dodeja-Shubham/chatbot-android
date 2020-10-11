@@ -1,21 +1,34 @@
 package com.vys.chatbot.Activity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 
+import com.balysv.materialripple.MaterialRippleLayout;
 import com.vys.chatbot.Adapter.ChannelsAdapter;
 import com.vys.chatbot.Adapter.EmptyDataShimmerAdapter;
 import com.vys.chatbot.Adapter.DMAdapter;
+import com.vys.chatbot.Adapter.ScheduledMessagesAdapter;
 import com.vys.chatbot.Class.ApiRequestClass;
 import com.vys.chatbot.Class.RecyclerItemClickListener;
 import com.vys.chatbot.Models.ChannelsAPI.ChannelsAPI;
+import com.vys.chatbot.Models.SchedulesMessagesAPI.ScheduledMessagesAPI;
+import com.vys.chatbot.Models.SuccessResponse;
 import com.vys.chatbot.R;
 
 import java.io.IOException;
@@ -37,9 +50,12 @@ public class MainActivity extends AppCompatActivity {
     public static String USER_TOKEN = "";
     public static Map<String,String> usersNames = new HashMap<>();
 
-    RecyclerView channelsRecyclerView, messagesRecyclerView;
+    RecyclerView channelsRecyclerView, messagesRecyclerView, scheduledUser, scheduledBot;
     ChannelsAPI channelsData;
     ChannelsAPI messagesData;
+    ScheduledMessagesAPI userScheduled,botScheduled;
+
+    MaterialRippleLayout addChannel;
 
     OkHttpClient okHttpClient = new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
@@ -64,13 +80,59 @@ public class MainActivity extends AppCompatActivity {
 
         channelsRecyclerView = findViewById(R.id.main_channels_rv);
         messagesRecyclerView = findViewById(R.id.main_dm_rv);
+        addChannel = findViewById(R.id.main_channel_add);
+        scheduledUser = findViewById(R.id.main_sch_user_rv);
+        scheduledBot = findViewById(R.id.main_sch_bot_rv);
 
         channelsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         messagesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        scheduledUser.setLayoutManager(new LinearLayoutManager(this));
+        scheduledBot.setLayoutManager(new LinearLayoutManager(this));
+
+
+        addChannel.setOnClickListener(it -> {
+            Dialog dialog = new Dialog(this);
+            View dialogView = LayoutInflater.from(this).inflate(R.layout.add_channel_dialog, null);
+            dialog.setContentView(dialogView);
+            dialog.setCancelable(false);
+            Window window = dialog.getWindow();
+            assert window != null;
+            window.setGravity(Gravity.CENTER);
+            window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            window.setBackgroundDrawableResource(android.R.color.transparent);
+            EditText channelName = dialogView.findViewById(R.id.add_cahnnel_name_et);
+            SwitchCompat isPrivate = dialogView.findViewById(R.id.add_channel_channel_type_switch);
+            ImageView close = dialogView.findViewById(R.id.add_channel_close);
+            Button save = dialogView.findViewById(R.id.add_channel_btn);
+            close.setOnClickListener(d -> dialog.dismiss());
+            save.setOnClickListener(d -> {
+                if(!channelName.getText().toString().isEmpty()){
+                    dialog.dismiss();
+                    Call<SuccessResponse> call = retrofitCall.createChannel(USER_TOKEN,channelName.getText().toString(),isPrivate.isChecked() ? "true" : "false");
+                    call.enqueue(new Callback<SuccessResponse>() {
+                        @Override
+                        public void onResponse(Call<SuccessResponse> call, Response<SuccessResponse> response) {
+                            if(response.isSuccessful()){
+                                loadChannelsData();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<SuccessResponse> call, Throwable t) {
+
+                        }
+                    });
+                }
+            });
+
+            dialog.show();
+        });
 
 
         loadChannelsData();
         loadMessagesData();
+        loadScheduledUser();
+        loadScheduledBot();
     }
 
 
@@ -89,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onItemClick(View view, int position) {
                             Intent intent = new Intent(MainActivity.this, MessagesActivity.class);
-                            intent.putExtra("type", "channel");
+                            intent.putExtra("type", channelsData.getChannels().get(position).getIsChannel() ? "channel" : "group");
                             intent.putExtra("id", channelsData.getChannels().get(position).getId());
                             intent.putExtra("name", channelsData.getChannels().get(position).getName());
                             intent.putExtra("user", "");
@@ -156,6 +218,52 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<ChannelsAPI> call, Throwable t) {
                 Log.e(TAG, t.getMessage());
+            }
+        });
+    }
+
+    private void loadScheduledUser(){
+        scheduledUser.setAdapter(new EmptyDataShimmerAdapter());
+        Call<ScheduledMessagesAPI> call = retrofitCall.scheduledMessages(USER_TOKEN);
+        call.enqueue(new Callback<ScheduledMessagesAPI>() {
+            @Override
+            public void onResponse(Call<ScheduledMessagesAPI> call, Response<ScheduledMessagesAPI> response) {
+                if(response.isSuccessful()){
+                    try{
+                        userScheduled = response.body();
+                        scheduledUser.setAdapter(new ScheduledMessagesAdapter(MainActivity.this,userScheduled.getScheduledMessages()));
+                    }catch (Exception e){
+                        Log.e(TAG,e.getMessage());
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ScheduledMessagesAPI> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void loadScheduledBot(){
+        scheduledBot.setAdapter(new EmptyDataShimmerAdapter());
+        Call<ScheduledMessagesAPI> call = retrofitCall.scheduledMessages(BOT_TOKEN);
+        call.enqueue(new Callback<ScheduledMessagesAPI>() {
+            @Override
+            public void onResponse(Call<ScheduledMessagesAPI> call, Response<ScheduledMessagesAPI> response) {
+                if(response.isSuccessful()){
+                    try{
+                        botScheduled = response.body();
+                        scheduledBot.setAdapter(new ScheduledMessagesAdapter(MainActivity.this,botScheduled.getScheduledMessages()));
+                    }catch (Exception e){
+                        Log.e(TAG,e.getMessage());
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ScheduledMessagesAPI> call, Throwable t) {
+
             }
         });
     }

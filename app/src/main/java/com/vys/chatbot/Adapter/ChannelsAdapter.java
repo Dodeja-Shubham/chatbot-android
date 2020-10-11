@@ -16,6 +16,8 @@ import com.vys.chatbot.Activity.MessagesActivity;
 import com.vys.chatbot.Models.ChannelsAPI.Channel;
 import com.vys.chatbot.R;
 
+import org.w3c.dom.Text;
+
 import java.util.List;
 
 
@@ -39,6 +41,9 @@ public class ChannelsAdapter extends RecyclerView.Adapter<ChannelsAdapter.MyView
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         holder.name.setText(list.get(position).getName());
+        if(list.get(position).getIsPrivate()){
+            holder.channelPrivate.setText("℗");
+        }
     }
 
     @Override
@@ -46,14 +51,16 @@ public class ChannelsAdapter extends RecyclerView.Adapter<ChannelsAdapter.MyView
         return list == null ? 0 : list.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
         TextView name;
+        TextView channelPrivate;
         MaterialRippleLayout rippleLayout;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.channels_adapter_name_tv);
             rippleLayout = itemView.findViewById(R.id.channel_adapter_ripple);
+            channelPrivate = itemView.findViewById(R.id.channels_adapter_prefix);
         }
     }
 }

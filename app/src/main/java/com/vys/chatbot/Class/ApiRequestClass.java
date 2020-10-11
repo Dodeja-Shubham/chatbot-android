@@ -8,6 +8,7 @@ import com.vys.chatbot.Models.ChannelsAPI.ChannelsAPI;
 import com.vys.chatbot.Models.ChannelMessagesAPI.ChannelMessagesAPI;
 import com.vys.chatbot.Models.DMMessagesAPI.DMMessagesAPI;
 import com.vys.chatbot.Models.DelMessageAPI;
+import com.vys.chatbot.Models.SchedulesMessagesAPI.ScheduledMessagesAPI;
 import com.vys.chatbot.Models.SuccessResponse;
 import com.vys.chatbot.Models.UserProfileAPI.UserProfileAPI;
 
@@ -34,8 +35,8 @@ public interface ApiRequestClass {
     @GET("conversations.history")
     Call<DMMessagesAPI> messagesUser(@Query("token") String token, @Query("channel") String id);
 
-
-
+    @POST("conversations.create")
+    Call<SuccessResponse> createChannel(@Query("token") String token, @Query("name") String name, @Query("is_private") String is_private);
 
 
     /**bot tokens api*/
@@ -63,4 +64,10 @@ public interface ApiRequestClass {
 
     @POST("chat.scheduleMessage")
     Call<SuccessResponse> scheduleMessage(@Query("token") String token, @Query("channel") String id, @Query("text") String text, @Query("post_at") String ts);
+
+    @POST("chat.deleteScheduledMessage")
+    Call<SuccessResponse> delScheduledMessage(@Query("token") String token, @Query("channel") String channel, @Query("scheduled_message_id") String id);
+
+    @POST("chat.scheduledMessages.list")
+    Call<ScheduledMessagesAPI> scheduledMessages(@Query("token") String token);
 }

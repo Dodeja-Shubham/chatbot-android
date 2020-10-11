@@ -150,7 +150,6 @@ public class MessagesActivity extends AppCompatActivity {
 
         backBtn.setOnClickListener(it -> super.onBackPressed());
 
-
         timer.setOnClickListener(it -> {
             Dialog dialog = new Dialog(this);
             View dialogView = LayoutInflater.from(this).inflate(R.layout.schedule_message_dialog, null);
@@ -264,9 +263,15 @@ public class MessagesActivity extends AppCompatActivity {
             timer.setVisibility(View.VISIBLE);
             loadChannelMessages();
             loadChannelInfo();
-        } else {
+        } else if(type.equals("dm")) {
             loadUserInfo();
             loadUserMessages();
+        } else{
+            title.setText(name);
+            sendBotBtn.setVisibility(View.VISIBLE);
+            loadChannelMessages();
+            loadChannelInfo();
+            sendBotBtn.setVisibility(View.GONE);
         }
     }
 
@@ -518,59 +523,61 @@ public class MessagesActivity extends AppCompatActivity {
                         public void onResponse(Call<ChannelInfoAPI> call, Response<ChannelInfoAPI> response) {
                             if (response.isSuccessful()) {
                                 botChannelInfo = response.body();
-                                if (!userChannelInfo.getChannel().getIsMember() && !botChannelInfo.getChannel().getIsMember()) {
-                                    CFAlertDialog.Builder builder = new CFAlertDialog.Builder(MessagesActivity.this)
-                                            .setDialogStyle(CFAlertDialog.CFAlertStyle.BOTTOM_SHEET)
-                                            .setTitle("Alert !!!")
-                                            .setMessage("You are not a member of this channel and neither is ChatBot. Do you want to join this channel ?")
-                                            .addButton("ADD ONLY ME", -1, -1, CFAlertDialog.CFAlertActionStyle.POSITIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
-                                                joinChannel(USER_TOKEN, id);
-                                                dialog.dismiss();
-                                            })
-                                            .addButton("ADD CHATBOT", -1, -1, CFAlertDialog.CFAlertActionStyle.POSITIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
-                                                joinChannel(BOT_TOKEN, id);
-                                                dialog.dismiss();
-                                            })
-                                            .addButton("ADD BOTH", -1, -1, CFAlertDialog.CFAlertActionStyle.POSITIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
-                                                joinChannel(USER_TOKEN, id);
-                                                joinChannel(BOT_TOKEN, id);
-                                                dialog.dismiss();
-                                            })
-                                            .addButton("CANCEL", -1, -1, CFAlertDialog.CFAlertActionStyle.NEGATIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
-                                                holder.setVisibility(View.GONE);
-                                                dialog.dismiss();
-                                            });
-                                    builder.show();
-                                } else if (!userChannelInfo.getChannel().getIsMember()) {
-                                    CFAlertDialog.Builder builder = new CFAlertDialog.Builder(MessagesActivity.this)
-                                            .setDialogStyle(CFAlertDialog.CFAlertStyle.BOTTOM_SHEET)
-                                            .setTitle("Alert !!!")
-                                            .setMessage("You are not a member of this channel. Do you want to join this channel ?")
-                                            .addButton("JOIN", -1, -1, CFAlertDialog.CFAlertActionStyle.POSITIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
-                                                joinChannel(USER_TOKEN, id);
-                                                dialog.dismiss();
-                                            })
-                                            .addButton("CANCEL", -1, -1, CFAlertDialog.CFAlertActionStyle.NEGATIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
-                                                holder.setVisibility(View.VISIBLE);
-                                                dialog.dismiss();
-                                            });
-                                    builder.show();
-                                } else if (!botChannelInfo.getChannel().getIsMember()) {
-                                    CFAlertDialog.Builder builder = new CFAlertDialog.Builder(MessagesActivity.this)
-                                            .setDialogStyle(CFAlertDialog.CFAlertStyle.BOTTOM_SHEET)
-                                            .setTitle("Alert !!!")
-                                            .setMessage("ChatBot is not a member of this channel. Do you want to add ChatBot in this channel ?")
-                                            .addButton("ADD CHATBOT", -1, -1, CFAlertDialog.CFAlertActionStyle.POSITIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
-                                                joinChannel(BOT_TOKEN, id);
-                                                dialog.dismiss();
-                                            })
-                                            .addButton("CANCEL", -1, -1, CFAlertDialog.CFAlertActionStyle.NEGATIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
-                                                holder.setVisibility(View.VISIBLE);
-                                                dialog.dismiss();
-                                            });
-                                    builder.show();
-                                } else {
-                                    holder.setVisibility(View.VISIBLE);
+                                if(userChannelInfo.getChannel().getIsChannel() && botChannelInfo.getChannel().getIsChannel()){
+                                    if (!userChannelInfo.getChannel().getIsMember() && !botChannelInfo.getChannel().getIsMember()) {
+                                        CFAlertDialog.Builder builder = new CFAlertDialog.Builder(MessagesActivity.this)
+                                                .setDialogStyle(CFAlertDialog.CFAlertStyle.BOTTOM_SHEET)
+                                                .setTitle("Alert !!!")
+                                                .setMessage("You are not a member of this channel and neither is ChatBot. Do you want to join this channel ?")
+                                                .addButton("ADD ONLY ME", -1, -1, CFAlertDialog.CFAlertActionStyle.POSITIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                                    joinChannel(USER_TOKEN, id);
+                                                    dialog.dismiss();
+                                                })
+                                                .addButton("ADD CHATBOT", -1, -1, CFAlertDialog.CFAlertActionStyle.POSITIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                                    joinChannel(BOT_TOKEN, id);
+                                                    dialog.dismiss();
+                                                })
+                                                .addButton("ADD BOTH", -1, -1, CFAlertDialog.CFAlertActionStyle.POSITIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                                    joinChannel(USER_TOKEN, id);
+                                                    joinChannel(BOT_TOKEN, id);
+                                                    dialog.dismiss();
+                                                })
+                                                .addButton("CANCEL", -1, -1, CFAlertDialog.CFAlertActionStyle.NEGATIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                                    holder.setVisibility(View.GONE);
+                                                    dialog.dismiss();
+                                                });
+                                        builder.show();
+                                    } else if (!userChannelInfo.getChannel().getIsMember()) {
+                                        CFAlertDialog.Builder builder = new CFAlertDialog.Builder(MessagesActivity.this)
+                                                .setDialogStyle(CFAlertDialog.CFAlertStyle.BOTTOM_SHEET)
+                                                .setTitle("Alert !!!")
+                                                .setMessage("You are not a member of this channel. Do you want to join this channel ?")
+                                                .addButton("JOIN", -1, -1, CFAlertDialog.CFAlertActionStyle.POSITIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                                    joinChannel(USER_TOKEN, id);
+                                                    dialog.dismiss();
+                                                })
+                                                .addButton("CANCEL", -1, -1, CFAlertDialog.CFAlertActionStyle.NEGATIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                                    holder.setVisibility(View.VISIBLE);
+                                                    dialog.dismiss();
+                                                });
+                                        builder.show();
+                                    } else if (!botChannelInfo.getChannel().getIsMember()) {
+                                        CFAlertDialog.Builder builder = new CFAlertDialog.Builder(MessagesActivity.this)
+                                                .setDialogStyle(CFAlertDialog.CFAlertStyle.BOTTOM_SHEET)
+                                                .setTitle("Alert !!!")
+                                                .setMessage("ChatBot is not a member of this channel. Do you want to add ChatBot in this channel ?")
+                                                .addButton("ADD CHATBOT", -1, -1, CFAlertDialog.CFAlertActionStyle.POSITIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                                    joinChannel(BOT_TOKEN, id);
+                                                    dialog.dismiss();
+                                                })
+                                                .addButton("CANCEL", -1, -1, CFAlertDialog.CFAlertActionStyle.NEGATIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                                    holder.setVisibility(View.VISIBLE);
+                                                    dialog.dismiss();
+                                                });
+                                        builder.show();
+                                    } else {
+                                        holder.setVisibility(View.VISIBLE);
+                                    }
                                 }
                             } else {
                                 try {
