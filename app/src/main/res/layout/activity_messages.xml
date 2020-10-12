@@ -120,8 +120,7 @@
                 android:visibility="gone"
                 android:layout_gravity="center"
                 android:layout_marginEnd="16dp"
-                android:src="@drawable/ic_bot"
-                app:tint="@color/colorPrimaryDark" />
+                android:src="@drawable/bot"/>
 
             <ImageView
                 android:id="@+id/messages_send_btn"
@@ -131,7 +130,7 @@
                 android:layout_marginEnd="13dp"
                 android:rotation="320"
                 android:src="@drawable/ic_send"
-                app:tint="@color/colorPrimaryDark" />
+                app:tint="@color/colorPrimary" />
 
         </LinearLayout>
 
