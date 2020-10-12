@@ -2,14 +2,17 @@ package com.vys.chatbot.Adapter;
 
 import android.annotation.SuppressLint;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.gson.Gson;
 import com.vys.chatbot.Activity.MainActivity;
-import com.vys.chatbot.Class.ApiRequestClass;
+import com.vys.chatbot.Class.SlackApiRequestClass;
 import com.vys.chatbot.Models.ChannelMessagesAPI.Message;
 import com.vys.chatbot.Models.UserProfileAPI.UserProfileAPI;
 import com.vys.chatbot.R;
@@ -20,12 +23,14 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.vys.chatbot.Class.RandomString.randomText;
+
 public class ChannelMessagesAdapter extends RecyclerView.Adapter<ChannelMessagesAdapter.MyViewHolder> {
 
     List<Message> list;
-    ApiRequestClass retrofitCall;
+    SlackApiRequestClass retrofitCall;
 
-    public ChannelMessagesAdapter(List<Message> data,ApiRequestClass call){
+    public ChannelMessagesAdapter(List<Message> data, SlackApiRequestClass call){
         this.list = data;
         this.retrofitCall = call;
     }
@@ -43,16 +48,24 @@ public class ChannelMessagesAdapter extends RecyclerView.Adapter<ChannelMessages
         if(list.get(position).getText().startsWith("<@")){
             String user = list.get(position).getText().substring(list.get(position).getText().indexOf("<@") + 2, list.get(position).getText().indexOf(">"));
             if(MainActivity.usersNames.containsKey(user)){
-                holder.message.setText("@" + MainActivity.usersNames.get(user) + " joined !!");
+                try{
+                    holder.message.setText("@" + MainActivity.usersNames.get(user) + " joined !!");
+                }catch (Exception e){
+                    holder.message.setText(randomText());
+                }
             }else{
                 Call<UserProfileAPI> callT = retrofitCall.userProfile(MainActivity.BOT_TOKEN,user);
                 callT.enqueue(new Callback<UserProfileAPI>() {
                     @SuppressLint("SetTextI18n")
                     @Override
                     public void onResponse(Call<UserProfileAPI> call, Response<UserProfileAPI> response) {
-                        if(response.isSuccessful()){
-                            holder.message.setText("@" + response.body().getUser().getName() + " joined via your invite link!");
-                        }else{
+                        try{
+                            if(response.isSuccessful()){
+                                holder.message.setText("@" + response.body().getUser().getName() + " joined via your invite link!");
+                            }else{
+                                holder.message.setText("New User joined");
+                            }
+                        }catch (Exception e){
                             holder.message.setText("New User joined");
                         }
                     }
@@ -74,16 +87,26 @@ public class ChannelMessagesAdapter extends RecyclerView.Adapter<ChannelMessages
             call.enqueue(new Callback<UserProfileAPI>() {
                 @Override
                 public void onResponse(Call<UserProfileAPI> call, Response<UserProfileAPI> response) {
-                    if(response.isSuccessful()){
-                        holder.name.setText(response.body().getUser().getName());
-                    }else{
-                        holder.name.setText(list.get(position).getUser());
+                    try{
+                        Log.e("ChannelMessagesAdapter",new Gson().toJson(response.body()));
+                        if(response.isSuccessful()){
+                            holder.name.setText(response.body().getUser().getName());
+                        }else{
+                            holder.name.setText(list.get(position).getUser());
+                        }
+                    }catch(Exception e){
+                        Log.e("ChannelMessagesAdapter",e.getMessage());
                     }
                 }
 
                 @Override
                 public void onFailure(Call<UserProfileAPI> call, Throwable t) {
-                    holder.name.setText(list.get(position).getUser());
+                    try{
+                        holder.name.setText(list.get(position).getUser());
+                    }catch(Exception e){
+                        holder.name.setText(randomText());
+                    }
+
                 }
             });
         }

@@ -10,9 +10,7 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.SharedPreferences;
-import android.icu.util.GregorianCalendar;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -20,14 +18,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.balysv.materialripple.MaterialRippleLayout;
@@ -35,14 +31,11 @@ import com.crowdfire.cfalertdialog.CFAlertDialog;
 import com.vys.chatbot.Adapter.ChannelMessagesAdapter;
 import com.vys.chatbot.Adapter.DMMessagesAdapter;
 import com.vys.chatbot.Adapter.ScheduleArrayAdapter;
-import com.vys.chatbot.Class.ApiRequestClass;
+import com.vys.chatbot.Class.SlackApiRequestClass;
 import com.vys.chatbot.Class.RecyclerItemClickListener;
 import com.vys.chatbot.Models.ChannelInfoAPI.ChannelInfoAPI;
 import com.vys.chatbot.Models.ChannelJoinAPI.ChannelJoinAPI;
 import com.vys.chatbot.Models.ChannelMessagesAPI.ChannelMessagesAPI;
-import com.vys.chatbot.Models.ChannelMessagesAPI.Message;
-import com.vys.chatbot.Models.ChannelsAPI.Channel;
-import com.vys.chatbot.Models.ChannelsAPI.ChannelsAPI;
 import com.vys.chatbot.Models.DMMessagesAPI.DMMessagesAPI;
 import com.vys.chatbot.Models.DelMessageAPI;
 import com.vys.chatbot.Models.SuccessResponse;
@@ -65,6 +58,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import static com.vys.chatbot.Activity.MainActivity.ADMIN_TOKEN;
 import static com.vys.chatbot.Activity.MainActivity.BOT_TOKEN;
 import static com.vys.chatbot.Activity.MainActivity.USER_TOKEN;
 
@@ -72,13 +66,13 @@ public class MessagesActivity extends AppCompatActivity {
 
     private final String TAG = "MessagesActivity";
 
-    private final String[] SCHEDULES = {"Once", "Daily", "Every 7 days", "Every 10 days", "Every 20 days", "Every 30 days"};
+    private final String[] SCHEDULES = {"Once", "Daily", "Every 7 days","Every 30 days"};
 
     OkHttpClient okHttpClient = new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS).build();
-    Retrofit retrofit = new Retrofit.Builder().baseUrl(ApiRequestClass.BASE_URL).client(okHttpClient).addConverterFactory(GsonConverterFactory.create()).build();
-    private ApiRequestClass retrofitCall = retrofit.create(ApiRequestClass.class);
+    Retrofit retrofit = new Retrofit.Builder().baseUrl(SlackApiRequestClass.BASE_URL).client(okHttpClient).addConverterFactory(GsonConverterFactory.create()).build();
+    private SlackApiRequestClass retrofitCall = retrofit.create(SlackApiRequestClass.class);
 
     DMMessagesAPI userMessages;
     ChannelMessagesAPI channelMessages;
@@ -213,40 +207,149 @@ public class MessagesActivity extends AppCompatActivity {
                     if(sendAs.getCheckedRadioButtonId() == R.id.schedule_user_radio){
                         if(userChannelInfo.getChannel().getIsMember()){
                             dialog.dismiss();
-                            Call<SuccessResponse> call = retrofitCall.scheduleMessage(USER_TOKEN,id,msg.getText().toString().trim(),String.valueOf(ts/1000));
-                            call.enqueue(new Callback<SuccessResponse>() {
-                                @Override
-                                public void onResponse(Call<SuccessResponse> call, Response<SuccessResponse> response) {
-                                    if(response.isSuccessful()){
-                                        Toast.makeText(MessagesActivity.this,"Message Scheduled",Toast.LENGTH_LONG).show();
+                            if(selected[0] == 0){
+                                Call<SuccessResponse> call = retrofitCall.scheduleMessage(USER_TOKEN,id,msg.getText().toString().trim(),String.valueOf(ts/1000),"true");
+                                call.enqueue(new Callback<SuccessResponse>() {
+                                    @Override
+                                    public void onResponse(Call<SuccessResponse> call, Response<SuccessResponse> response) {
+                                        if(response.isSuccessful()){
+                                            Log.e(TAG,String.valueOf(ts));
+                                            Toast.makeText(MessagesActivity.this,"Message Scheduled",Toast.LENGTH_LONG).show();
+                                        }
                                     }
-                                }
 
-                                @Override
-                                public void onFailure(Call<SuccessResponse> call, Throwable t) {
+                                    @Override
+                                    public void onFailure(Call<SuccessResponse> call, Throwable t) {
 
+                                    }
+                                });
+                            }else if(selected[0] == 1){
+                                for(int i = 0;i <= 7;i++){
+                                    Call<SuccessResponse> call = retrofitCall.scheduleMessage(USER_TOKEN,id,msg.getText().toString().trim(),String.valueOf((ts/1000) + (i*86400)),"true");
+                                    int finalI = i;
+                                    call.enqueue(new Callback<SuccessResponse>() {
+                                        @Override
+                                        public void onResponse(Call<SuccessResponse> call, Response<SuccessResponse> response) {
+                                            if(response.isSuccessful() && finalI == 0){
+                                                Toast.makeText(MessagesActivity.this,"Message Scheduled",Toast.LENGTH_LONG).show();
+                                            }
+                                        }
+                                        @Override
+                                        public void onFailure(Call<SuccessResponse> call, Throwable t) {
+                                        }
+                                    });
                                 }
-                            });
+                            }else if(selected[0] == 2){
+                                for(int i = 0;i <= 7;i++){
+                                    Call<SuccessResponse> call = retrofitCall.scheduleMessage(USER_TOKEN,id,msg.getText().toString().trim(),String.valueOf((ts/1000) + (i*86400*7)),"true");
+                                    int finalI = i;
+                                    call.enqueue(new Callback<SuccessResponse>() {
+                                        @Override
+                                        public void onResponse(Call<SuccessResponse> call, Response<SuccessResponse> response) {
+                                            if(response.isSuccessful() && finalI == 0){
+                                                Toast.makeText(MessagesActivity.this,"Message Scheduled",Toast.LENGTH_LONG).show();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(Call<SuccessResponse> call, Throwable t) {
+
+                                        }
+                                    });
+                                }
+                            }else if(selected[0] == 3){
+                                for(int i = 0;i <= 7;i++){
+                                    Call<SuccessResponse> call = retrofitCall.scheduleMessage(USER_TOKEN,id,msg.getText().toString().trim(),String.valueOf((ts/1000) + (i*86400*30)),"true");
+                                    int finalI = i;
+                                    call.enqueue(new Callback<SuccessResponse>() {
+                                        @Override
+                                        public void onResponse(Call<SuccessResponse> call, Response<SuccessResponse> response) {
+                                            if(response.isSuccessful() && finalI == 0){
+                                                Toast.makeText(MessagesActivity.this,"Message Scheduled",Toast.LENGTH_LONG).show();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(Call<SuccessResponse> call, Throwable t) {
+
+                                        }
+                                    });
+                                }
+                            }
                         }else{
                             Toast.makeText(this,"You are not a member of this channel",Toast.LENGTH_LONG).show();
                         }
                     }else{
                         if(botChannelInfo.getChannel().getIsMember()){
                             dialog.dismiss();
-                            Call<SuccessResponse> call = retrofitCall.scheduleMessage(BOT_TOKEN,id,msg.getText().toString().trim(),String.valueOf(ts));
-                            call.enqueue(new Callback<SuccessResponse>() {
-                                @Override
-                                public void onResponse(Call<SuccessResponse> call, Response<SuccessResponse> response) {
-                                    if(response.isSuccessful()){
-                                        Toast.makeText(MessagesActivity.this,"Message Scheduled",Toast.LENGTH_LONG).show();
+                            if(selected[0] == 0){
+                                Call<SuccessResponse> call = retrofitCall.scheduleMessage(BOT_TOKEN,id,msg.getText().toString().trim(),String.valueOf(ts/1000),"false");
+                                call.enqueue(new Callback<SuccessResponse>() {
+                                    @Override
+                                    public void onResponse(Call<SuccessResponse> call, Response<SuccessResponse> response) {
+                                        if(response.isSuccessful()){
+                                            Toast.makeText(MessagesActivity.this,"Message Scheduled",Toast.LENGTH_LONG).show();
+                                        }
                                     }
-                                }
 
-                                @Override
-                                public void onFailure(Call<SuccessResponse> call, Throwable t) {
+                                    @Override
+                                    public void onFailure(Call<SuccessResponse> call, Throwable t) {
 
+                                    }
+                                });
+                            }else if(selected[0] == 1){
+                                for(int i = 0;i <= 7;i++){
+                                    Call<SuccessResponse> call = retrofitCall.scheduleMessage(BOT_TOKEN,id,msg.getText().toString().trim(),String.valueOf((ts/1000) + (i*86400)),"false");
+                                    int finalI = i;
+                                    call.enqueue(new Callback<SuccessResponse>() {
+                                        @Override
+                                        public void onResponse(Call<SuccessResponse> call, Response<SuccessResponse> response) {
+                                            if(response.isSuccessful() && finalI == 0){
+                                                Toast.makeText(MessagesActivity.this,"Message Scheduled",Toast.LENGTH_LONG).show();
+                                            }
+                                        }
+                                        @Override
+                                        public void onFailure(Call<SuccessResponse> call, Throwable t) {
+                                        }
+                                    });
                                 }
-                            });
+                            }else if(selected[0] == 2){
+                                for(int i = 0;i <= 7;i++){
+                                    Call<SuccessResponse> call = retrofitCall.scheduleMessage(BOT_TOKEN,id,msg.getText().toString().trim(),String.valueOf((ts/1000) + (i*86400*7)),"false");
+                                    int finalI = i;
+                                    call.enqueue(new Callback<SuccessResponse>() {
+                                        @Override
+                                        public void onResponse(Call<SuccessResponse> call, Response<SuccessResponse> response) {
+                                            if(response.isSuccessful() && finalI == 0){
+                                                Toast.makeText(MessagesActivity.this,"Message Scheduled",Toast.LENGTH_LONG).show();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(Call<SuccessResponse> call, Throwable t) {
+
+                                        }
+                                    });
+                                }
+                            }else if(selected[0] == 3){
+                                for(int i = 0;i <= 7;i++){
+                                    Call<SuccessResponse> call = retrofitCall.scheduleMessage(BOT_TOKEN,id,msg.getText().toString().trim(),String.valueOf((ts/1000) + (i*86400*30)),"false");
+                                    int finalI = i;
+                                    call.enqueue(new Callback<SuccessResponse>() {
+                                        @Override
+                                        public void onResponse(Call<SuccessResponse> call, Response<SuccessResponse> response) {
+                                            if(response.isSuccessful() && finalI == 0){
+                                                Toast.makeText(MessagesActivity.this,"Message Scheduled",Toast.LENGTH_LONG).show();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(Call<SuccessResponse> call, Throwable t) {
+
+                                        }
+                                    });
+                                }
+                            }
                         }else{
                             Toast.makeText(this,"ChatBot is not a member of this channel",Toast.LENGTH_LONG).show();
                         }
@@ -278,10 +381,9 @@ public class MessagesActivity extends AppCompatActivity {
     private void sendMessage() {
         String msg = typedMessage.getText().toString().trim();
         if (type.equals("channel") && !msg.isEmpty()) {
-
             if (userChannelInfo.getChannel().getIsMember()) {
                 typedMessage.setText("");
-                Call<SuccessResponse> call = retrofitCall.sendMessage(USER_TOKEN, id, msg);
+                Call<SuccessResponse> call = retrofitCall.sendMessage(ADMIN_TOKEN, id, msg, "true");
                 call.enqueue(new Callback<SuccessResponse>() {
                     @Override
                     public void onResponse(Call<SuccessResponse> call, Response<SuccessResponse> response) {
@@ -301,7 +403,7 @@ public class MessagesActivity extends AppCompatActivity {
 
         } else if (!msg.isEmpty()) {
             typedMessage.setText("");
-            Call<SuccessResponse> call = retrofitCall.sendMessage(USER_TOKEN, id, msg);
+            Call<SuccessResponse> call = retrofitCall.sendMessage(ADMIN_TOKEN, id, msg, "true");
             call.enqueue(new Callback<SuccessResponse>() {
                 @Override
                 public void onResponse(Call<SuccessResponse> call, Response<SuccessResponse> response) {
@@ -323,7 +425,7 @@ public class MessagesActivity extends AppCompatActivity {
         if (type.equals("channel") && !msg.isEmpty()) {
             if (botChannelInfo.getChannel().getIsMember()) {
                 typedMessage.setText("");
-                Call<SuccessResponse> call = retrofitCall.sendMessage(BOT_TOKEN, id, msg);
+                Call<SuccessResponse> call = retrofitCall.sendMessage(BOT_TOKEN, id, msg, "true");
                 call.enqueue(new Callback<SuccessResponse>() {
                     @Override
                     public void onResponse(Call<SuccessResponse> call, Response<SuccessResponse> response) {
@@ -633,14 +735,13 @@ public class MessagesActivity extends AppCompatActivity {
         });
     }
 
-
     private String getDate(Date date) {
         DateFormat format = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
         return format.format(date);
     }
 
     private String getTime(Date date) {
-        DateFormat format = new SimpleDateFormat("HH-mm", Locale.ENGLISH);
+        DateFormat format = new SimpleDateFormat("hh-mm aa", Locale.ENGLISH);
         return format.format(date);
     }
 

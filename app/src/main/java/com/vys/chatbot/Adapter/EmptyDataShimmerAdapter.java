@@ -27,7 +27,7 @@ public class EmptyDataShimmerAdapter extends RecyclerView.Adapter<EmptyDataShimm
         return 5;
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
         ShimmerFrameLayout shimmer;
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);

@@ -20,6 +20,8 @@ import org.w3c.dom.Text;
 
 import java.util.List;
 
+import static com.vys.chatbot.Class.RandomString.randomText;
+
 
 public class ChannelsAdapter extends RecyclerView.Adapter<ChannelsAdapter.MyViewHolder> {
 
@@ -40,9 +42,14 @@ public class ChannelsAdapter extends RecyclerView.Adapter<ChannelsAdapter.MyView
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        holder.name.setText(list.get(position).getName());
-        if(list.get(position).getIsPrivate()){
-            holder.channelPrivate.setText("℗");
+        try{
+            holder.name.setText(list.get(position).getName());
+            if(list.get(position).getIsPrivate()){
+                holder.channelPrivate.setText("℗");
+            }
+        }catch (Exception e){
+            holder.channelPrivate.setText("#");
+            holder.name.setText(randomText());
         }
     }
 

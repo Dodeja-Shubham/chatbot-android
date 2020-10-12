@@ -1,8 +1,6 @@
 package com.vys.chatbot.Adapter;
 
 import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,8 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.balysv.materialripple.MaterialRippleLayout;
 import com.bumptech.glide.Glide;
 import com.vys.chatbot.Activity.MainActivity;
-import com.vys.chatbot.Activity.MessagesActivity;
-import com.vys.chatbot.Class.ApiRequestClass;
+import com.vys.chatbot.Class.SlackApiRequestClass;
 import com.vys.chatbot.Models.ChannelsAPI.Channel;
 import com.vys.chatbot.Models.UserProfileAPI.UserProfileAPI;
 import com.vys.chatbot.R;
@@ -28,9 +25,9 @@ public class DMAdapter extends RecyclerView.Adapter<DMAdapter.MyViewHolder> {
 
     List<Channel> list;
     Context context;
-    ApiRequestClass retrofitCall;
+    SlackApiRequestClass retrofitCall;
 
-    public DMAdapter(List<Channel> listData,Context context,ApiRequestClass call){
+    public DMAdapter(List<Channel> listData, Context context, SlackApiRequestClass call){
         this.list = listData;
         this.context = context;
         this.retrofitCall = call;

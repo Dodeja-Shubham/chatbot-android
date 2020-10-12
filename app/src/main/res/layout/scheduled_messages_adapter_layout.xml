@@ -13,23 +13,42 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/scheduled_name"
-            tools:text="vikanshu"
-            android:textColor="@color/black"
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_weight="1"
-            android:layout_gravity="center"
             android:layout_width="0dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/scheduled_name"
+                tools:text="vikanshu"
+                android:textColor="@color/black"
+                android:layout_gravity="center"
+                android:layout_width="match_parent"
+                android:ellipsize="end"
+                android:textSize="16sp"
+                android:maxLines="1"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/scheduled_time"
+                tools:text="vikanshu"
+                android:textColor="@android:color/darker_gray"
+                android:layout_gravity="center"
+                android:layout_width="match_parent"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
 
         <ImageView
-            android:src="@drawable/ic_edit"
+            android:id="@+id/scheduled_iv"
+            android:src="@drawable/ic_delete"
             android:padding="2dp"
             android:layout_width="22dp"
             android:layout_height="22dp"
-            app:tint="@color/colorPrimary" />
+            app:tint="@android:color/holo_red_light" />
 
     </LinearLayout>
 

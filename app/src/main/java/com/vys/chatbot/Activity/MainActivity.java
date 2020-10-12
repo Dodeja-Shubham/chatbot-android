@@ -18,13 +18,15 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.balysv.materialripple.MaterialRippleLayout;
+import com.crowdfire.cfalertdialog.CFAlertDialog;
 import com.vys.chatbot.Adapter.ChannelsAdapter;
 import com.vys.chatbot.Adapter.EmptyDataShimmerAdapter;
 import com.vys.chatbot.Adapter.DMAdapter;
 import com.vys.chatbot.Adapter.ScheduledMessagesAdapter;
-import com.vys.chatbot.Class.ApiRequestClass;
+import com.vys.chatbot.Class.SlackApiRequestClass;
 import com.vys.chatbot.Class.RecyclerItemClickListener;
 import com.vys.chatbot.Models.ChannelsAPI.ChannelsAPI;
 import com.vys.chatbot.Models.SchedulesMessagesAPI.ScheduledMessagesAPI;
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private final String TAG = "MainActivity";
     public static String BOT_TOKEN = "";
     public static String USER_TOKEN = "";
+    public static String ADMIN_TOKEN = "";
     public static Map<String,String> usersNames = new HashMap<>();
 
     RecyclerView channelsRecyclerView, messagesRecyclerView, scheduledUser, scheduledBot;
@@ -60,16 +63,18 @@ public class MainActivity extends AppCompatActivity {
     OkHttpClient okHttpClient = new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS).build();
-    Retrofit retrofit = new Retrofit.Builder().baseUrl(ApiRequestClass.BASE_URL).client(okHttpClient).addConverterFactory(GsonConverterFactory.create()).build();
-    private ApiRequestClass retrofitCall = retrofit.create(ApiRequestClass.class);
+    Retrofit retrofit = new Retrofit.Builder().baseUrl(SlackApiRequestClass.BASE_URL).client(okHttpClient).addConverterFactory(GsonConverterFactory.create()).build();
+    private SlackApiRequestClass retrofitCall = retrofit.create(SlackApiRequestClass.class);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        BOT_TOKEN = getString(R.string.bot_token);
-        USER_TOKEN = getString(R.string.user_token);
+        BOT_TOKEN = getIntent().getStringExtra("bot");
+//        USER_TOKEN = getIntent().getStringExtra("user");
+        ADMIN_TOKEN = getIntent().getStringExtra("admin");
+        USER_TOKEN = ADMIN_TOKEN;
         try {
             toolbar.setTitle("ChatBot");
             toolbar.setTitleTextColor(getColor(android.R.color.white));
@@ -135,6 +140,14 @@ public class MainActivity extends AppCompatActivity {
         loadScheduledBot();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadChannelsData();
+        loadMessagesData();
+        loadScheduledUser();
+        loadScheduledBot();
+    }
 
     private void loadChannelsData() {
         Map<String, String> data = new HashMap<>();
@@ -232,6 +245,44 @@ public class MainActivity extends AppCompatActivity {
                     try{
                         userScheduled = response.body();
                         scheduledUser.setAdapter(new ScheduledMessagesAdapter(MainActivity.this,userScheduled.getScheduledMessages()));
+                        scheduledUser.addOnItemTouchListener(new RecyclerItemClickListener(MainActivity.this, scheduledUser, new RecyclerItemClickListener.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(View view, int position) {
+                                CFAlertDialog.Builder builder = new CFAlertDialog.Builder(MainActivity.this)
+                                        .setDialogStyle(CFAlertDialog.CFAlertStyle.ALERT)
+                                        .setTitle("Alert !!!")
+                                        .setMessage("Are you sure you want to delete this scheduled message.")
+
+                                        .addButton("CANCEL", -1, -1, CFAlertDialog.CFAlertActionStyle.DEFAULT, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                            dialog.dismiss();
+                                        })
+                                        .addButton("DELETE", -1, -1, CFAlertDialog.CFAlertActionStyle.NEGATIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                            Call<SuccessResponse> call = retrofitCall.delScheduledMessage(USER_TOKEN,userScheduled.getScheduledMessages().get(position).getChannelId(),userScheduled.getScheduledMessages().get(position).getId());
+                                            call.enqueue(new Callback<SuccessResponse>() {
+                                                @Override
+                                                public void onResponse(Call<SuccessResponse> call, Response<SuccessResponse> response) {
+                                                    if(response.isSuccessful()){
+                                                        Toast.makeText(MainActivity.this,"Message Deleted",Toast.LENGTH_LONG).show();
+                                                        userScheduled.getScheduledMessages().remove(position);
+                                                        scheduledUser.getAdapter().notifyItemRemoved(position);
+                                                    }
+                                                }
+
+                                                @Override
+                                                public void onFailure(Call<SuccessResponse> call, Throwable t) {
+
+                                                }
+                                            });
+                                            dialog.dismiss();
+                                        });
+                                builder.show();
+                            }
+
+                            @Override
+                            public void onLongItemClick(View view, int position) {
+
+                            }
+                        }));
                     }catch (Exception e){
                         Log.e(TAG,e.getMessage());
                     }
@@ -255,6 +306,43 @@ public class MainActivity extends AppCompatActivity {
                     try{
                         botScheduled = response.body();
                         scheduledBot.setAdapter(new ScheduledMessagesAdapter(MainActivity.this,botScheduled.getScheduledMessages()));
+                        scheduledBot.addOnItemTouchListener(new RecyclerItemClickListener(MainActivity.this, scheduledBot, new RecyclerItemClickListener.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(View view, int position) {
+                                CFAlertDialog.Builder builder = new CFAlertDialog.Builder(MainActivity.this)
+                                        .setDialogStyle(CFAlertDialog.CFAlertStyle.ALERT)
+                                        .setTitle("Alert !!!")
+                                        .setMessage("Are you sure you want to delete this scheduled message.")
+                                        .addButton("CANCEL", -1, -1, CFAlertDialog.CFAlertActionStyle.DEFAULT, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                            dialog.dismiss();
+                                        })
+                                        .addButton("DELETE", -1, -1, CFAlertDialog.CFAlertActionStyle.NEGATIVE, CFAlertDialog.CFAlertActionAlignment.JUSTIFIED, (dialog, which) -> {
+                                            Call<SuccessResponse> call = retrofitCall.delScheduledMessage(BOT_TOKEN,botScheduled.getScheduledMessages().get(position).getChannelId(),botScheduled.getScheduledMessages().get(position).getId());
+                                            call.enqueue(new Callback<SuccessResponse>() {
+                                                @Override
+                                                public void onResponse(Call<SuccessResponse> call, Response<SuccessResponse> response) {
+                                                    if(response.isSuccessful()){
+                                                        Toast.makeText(MainActivity.this,"Message Deleted",Toast.LENGTH_LONG).show();
+                                                        botScheduled.getScheduledMessages().remove(position);
+                                                        scheduledBot.getAdapter().notifyItemRemoved(position);
+                                                    }
+                                                }
+
+                                                @Override
+                                                public void onFailure(Call<SuccessResponse> call, Throwable t) {
+                                                    Log.e(TAG,t.getMessage());
+                                                }
+                                            });
+                                            dialog.dismiss();
+                                        });
+                                builder.show();
+                            }
+
+                            @Override
+                            public void onLongItemClick(View view, int position) {
+
+                            }
+                        }));
                     }catch (Exception e){
                         Log.e(TAG,e.getMessage());
                     }
