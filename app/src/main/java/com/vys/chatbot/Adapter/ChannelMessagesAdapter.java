@@ -22,6 +22,7 @@ import java.util.Locale;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import static com.vys.chatbot.Activity.SplashActivity.*;
 
 import static com.vys.chatbot.Class.RandomString.randomText;
 
@@ -54,7 +55,7 @@ public class ChannelMessagesAdapter extends RecyclerView.Adapter<ChannelMessages
                     holder.message.setText(randomText());
                 }
             }else{
-                Call<UserProfileAPI> callT = retrofitCall.userProfile(MainActivity.BOT_TOKEN,user);
+                Call<UserProfileAPI> callT = retrofitCall.userProfile(BOT_TOKEN,user);
                 callT.enqueue(new Callback<UserProfileAPI>() {
                     @SuppressLint("SetTextI18n")
                     @Override
@@ -83,7 +84,7 @@ public class ChannelMessagesAdapter extends RecyclerView.Adapter<ChannelMessages
         if(MainActivity.usersNames.containsKey(list.get(position).getUser())){
             holder.name.setText(MainActivity.usersNames.get(list.get(position).getUser()));
         }else{
-            Call<UserProfileAPI> call = retrofitCall.userProfile(MainActivity.BOT_TOKEN,list.get(position).getUser());
+            Call<UserProfileAPI> call = retrofitCall.userProfile(BOT_TOKEN,list.get(position).getUser());
             call.enqueue(new Callback<UserProfileAPI>() {
                 @Override
                 public void onResponse(Call<UserProfileAPI> call, Response<UserProfileAPI> response) {

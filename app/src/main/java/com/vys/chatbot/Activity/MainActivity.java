@@ -1,5 +1,6 @@
 package com.vys.chatbot.Activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
@@ -12,6 +13,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -45,12 +48,11 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import static com.vys.chatbot.Activity.SplashActivity.*;
+
 public class MainActivity extends AppCompatActivity {
 
     private final String TAG = "MainActivity";
-    public static String BOT_TOKEN = "";
-    public static String USER_TOKEN = "";
-    public static String ADMIN_TOKEN = "";
     public static Map<String,String> usersNames = new HashMap<>();
 
     RecyclerView channelsRecyclerView, messagesRecyclerView, scheduledUser, scheduledBot;
@@ -71,10 +73,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        BOT_TOKEN = getIntent().getStringExtra("bot");
-//        USER_TOKEN = getIntent().getStringExtra("user");
-        ADMIN_TOKEN = getIntent().getStringExtra("admin");
-        USER_TOKEN = ADMIN_TOKEN;
+        USER_TOKEN = getSharedPreferences("DEFAULT",MODE_PRIVATE).getString("USER","");
         try {
             toolbar.setTitle("ChatBot");
             toolbar.setTitleTextColor(getColor(android.R.color.white));
@@ -142,11 +141,30 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        super.onResume();
         loadChannelsData();
         loadMessagesData();
         loadScheduledUser();
         loadScheduledBot();
+        super.onResume();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(item.getItemId() == R.id.menu_logout){
+            getSharedPreferences("DEFAULT",MODE_PRIVATE).edit().putString("USER","").apply();
+            getSharedPreferences("DEFAULT",MODE_PRIVATE).edit().putBoolean("logged",false).apply();
+            Intent intent = new Intent(MainActivity.this,SplashActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            intent.putExtra("logout_success",true);
+            startActivity(intent);
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void loadChannelsData() {

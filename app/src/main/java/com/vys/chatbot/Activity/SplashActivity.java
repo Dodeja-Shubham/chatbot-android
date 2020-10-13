@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -21,42 +22,27 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SplashActivity extends AppCompatActivity {
 
-    OkHttpClient okHttpClient = new OkHttpClient.Builder().connectTimeout(120, TimeUnit.SECONDS)
-            .writeTimeout(120, TimeUnit.SECONDS)
-            .readTimeout(120, TimeUnit.SECONDS).build();
-    Retrofit retrofit = new Retrofit.Builder().baseUrl(ApiRequestClass.BASE_URL).client(okHttpClient).addConverterFactory(GsonConverterFactory.create()).build();
-    private ApiRequestClass retrofitCall = retrofit.create(ApiRequestClass.class);
+    public static String BOT_TOKEN = "";
+    public static String USER_TOKEN = "";
+    public static String ADMIN_TOKEN = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-        Call<SlackToken> call = retrofitCall.getToken();
-        call.enqueue(new Callback<SlackToken>() {
-            @Override
-            public void onResponse(Call<SlackToken> call, Response<SlackToken> response) {
-                if(response.isSuccessful()){
-                    Intent intent = new Intent(SplashActivity.this,MainActivity.class);
-                    intent.putExtra("user",response.body().getAdminToken());
-                    intent.putExtra("bot",response.body().getBotToken());
-                    intent.putExtra("admin",response.body().getAdminToken());
-//                    intent.putExtra("user",getString(R.string.user_token));
-//                    intent.putExtra("bot",getString(R.string.bot_token));
-//                    intent.putExtra("admin",getString(R.string.user_token));
-                    new Handler().postDelayed(() -> {
-                        startActivity(intent);
-                    },1000);
-                } else {
-                    Toast.makeText(SplashActivity.this,"Unable to connect to internet",Toast.LENGTH_LONG).show();
-                    finish();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<SlackToken> call, Throwable t) {
-                Toast.makeText(SplashActivity.this,"Unable to connect to internet",Toast.LENGTH_LONG).show();
+        ADMIN_TOKEN = getString(R.string.user_token);
+        BOT_TOKEN = getString(R.string.bot_token);
+        if(getSharedPreferences("DEFAULT",MODE_PRIVATE).getBoolean("logged",false)){
+            USER_TOKEN = getSharedPreferences("DEFAULT",MODE_PRIVATE).getString("USER","");
+            new Handler().postDelayed(() -> {
+                startActivity(new Intent(SplashActivity.this,MainActivity.class));
                 finish();
-            }
-        });
+            }, 1000);
+        }else{
+            new Handler().postDelayed(() -> {
+                startActivity(new Intent(SplashActivity.this,LoginActivity.class));
+                finish();
+            }, 1000);
+        }
     }
 }

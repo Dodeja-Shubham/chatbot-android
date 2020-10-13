@@ -20,6 +20,7 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import static com.vys.chatbot.Activity.SplashActivity.*;
 
 public class DMAdapter extends RecyclerView.Adapter<DMAdapter.MyViewHolder> {
 
@@ -43,7 +44,7 @@ public class DMAdapter extends RecyclerView.Adapter<DMAdapter.MyViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         holder.prefix.setText("@");
-        Call<UserProfileAPI> call = retrofitCall.userProfile(MainActivity.BOT_TOKEN,list.get(position).getUser());
+        Call<UserProfileAPI> call = retrofitCall.userProfile(BOT_TOKEN,list.get(position).getUser());
         call.enqueue(new Callback<UserProfileAPI>() {
             @Override
             public void onResponse(Call<UserProfileAPI> call, Response<UserProfileAPI> response) {

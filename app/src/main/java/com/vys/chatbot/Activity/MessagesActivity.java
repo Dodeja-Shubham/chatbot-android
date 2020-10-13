@@ -58,9 +58,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import static com.vys.chatbot.Activity.MainActivity.ADMIN_TOKEN;
-import static com.vys.chatbot.Activity.MainActivity.BOT_TOKEN;
-import static com.vys.chatbot.Activity.MainActivity.USER_TOKEN;
+import static com.vys.chatbot.Activity.SplashActivity.*;
 
 public class MessagesActivity extends AppCompatActivity {
 

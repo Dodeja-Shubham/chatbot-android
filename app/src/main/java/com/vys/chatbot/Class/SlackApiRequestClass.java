@@ -1,5 +1,6 @@
 package com.vys.chatbot.Class;
 
+import com.vys.chatbot.Models.AuthTokenLogin.AuthToken;
 import com.vys.chatbot.Models.ChannelInfoAPI.ChannelInfoAPI;
 import com.vys.chatbot.Models.ChannelJoinAPI.ChannelJoinAPI;
 import com.vys.chatbot.Models.ChannelMessagesAPI.Message;
@@ -23,6 +24,12 @@ import retrofit2.http.QueryMap;
 public interface SlackApiRequestClass {
 
     public static String BASE_URL = "https://slack.com/api/";
+
+
+    /**auth*/
+    @GET("oauth.v2.access")
+    Call<AuthToken> getToken(@Query("code") String code,@Query("client_id") String client_id,@Query("client_secret") String client_secret,
+                             @Query("redirect_uri") String redirect_uri);
 
     /**user token api*/
 
